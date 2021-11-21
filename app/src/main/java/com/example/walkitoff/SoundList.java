@@ -1,6 +1,6 @@
 package com.example.walkitoff;
 
-public class Sound {
+public class SoundList {
 
     /*
     this class is to be used by the Alarm class. it functions as a library
@@ -12,9 +12,9 @@ public class Sound {
     private int arrayCapacity, level;
 
     /**
-     * default constructor
+     * constructor
      */
-    public Sound( int level ){
+    public SoundList(int level ){
 
         this.level = level;
 
@@ -30,9 +30,15 @@ public class Sound {
     }
 
     /**
-     * appends a single sound to the array
+     * adds a sound to an array if it has the capacity for it and returns the updated array
      *
-     * @param sound - alarm sound to add to array
+     * @param array - the array to add sound name to
+     *
+     * @param arraySize - how many sound names are in the array
+     *
+     * @param soundName - the sound name that can appear on the menu
+     *
+     * @return array
      */
     private String[] addSound( String[] array, int arraySize, String soundName ){
 
@@ -50,12 +56,14 @@ public class Sound {
      * <p>
      * note: uses score object to determine which sounds to add
      */
-    @SuppressWarnings("unused")
     public String[] addAllUnlockedSounds(){
 
         String[] unlockedSoundArray = new String[ arrayCapacity ];
 
         int arraySize = 0;
+
+        // TODO: add sounds without the repetition shown below
+        // maybe map each level to a sound name?
 
         unlockedSoundArray = addSound( unlockedSoundArray, arraySize, SoundName.DEFAULT_SOUND );
         arraySize++;
