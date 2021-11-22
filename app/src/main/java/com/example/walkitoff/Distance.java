@@ -2,6 +2,7 @@ package com.example.walkitoff;
 
 import android.content.Context;
 import android.location.Location;
+import java.util.Scanner;
 
 public class Distance {
 
@@ -15,9 +16,9 @@ public class Distance {
     private Context mainContext;
 
     /*
-    default distance goal in feet
+    user distance goal in feet
      */
-    private static final int DEFAULT_GOAL = 500;
+    private static final int userDistanceGoal;
 
     /**
      * default constructor
@@ -25,7 +26,7 @@ public class Distance {
      */
     public Distance( Context context ) {
 
-        this( context, DEFAULT_GOAL );
+        this( context, userDistanceGoal );
     }
 
     /**
@@ -68,6 +69,20 @@ public class Distance {
         // end loop
 
     }
+    
+    /**
+     * gets the user input for distance
+     *
+     */
+    public void userGoalDistance() {
+        
+        Scanner reader = new Scanner(System.in);
+
+        System.out.println(“Enter a goal distance to travel for the alarm: “);
+        
+        userDistanceGoal = reader.nextInt();
+    }
+
 
     /**
      * gets current distance between current location and last known location
