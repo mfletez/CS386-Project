@@ -14,6 +14,7 @@ import java.sql.Statement;
 public class ConnectDB extends AppCompatActivity {
 
     TextView thebox, testView, view1,view2,view3,view4,view5;
+    EditText idField,hostField,passField,adminField;
     public static String hostName,dbPass,adminName;
 
 
@@ -21,22 +22,41 @@ public class ConnectDB extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connect_db);
+        thebox = (TextView) findViewById(R.id.statusText);
+        view1 = (TextView) findViewById(R.id.textView9);
+        view2 = (TextView) findViewById(R.id.textView10);
+        view3 = (TextView) findViewById(R.id.textView11);
+        view4 = (TextView) findViewById(R.id.textView12);
+        view5 = (TextView) findViewById(R.id.textView13);
+        idField = (EditText) findViewById(R.id.editText1);
+        hostField = (EditText) findViewById(R.id.editText2);
+        passField = (EditText) findViewById(R.id.editText3);
+        adminField = (EditText) findViewById(R.id.editText4);
+
 
 
     }
 
-
     public void getConnected(View view)
     {
-        new Async().execute();
-    } //end connected
+        //set values before async uses them
+        MainActivity.uID = idField.getText().toString();
+        hostName = hostField.getText().toString();
+        adminName = adminField.getText().toString();
+        dbPass = passField.getText().toString();
+        new getDBData().execute();
+    }
 
+    public void updateDB(View view)
+    {
 
-    class Async extends AsyncTask<Void, Void, Void> {
+        new updateDB().execute();
+    }
+
+    class getDBData extends AsyncTask<Void, Void, Void> {
 
         String records = "",error = "", message = "Connected!!", distanceRan = "", unlockLevel = "";
-        //public Statement statement;
-
+        
         @Override
         protected Void doInBackground(Void... voids) {
 
@@ -47,32 +67,37 @@ public class ConnectDB extends AppCompatActivity {
                 ResultSet resultSet = statement.executeQuery("SELECT * FROM user");
 
 
-                //resultSet get ( column index) this will get the WHOLE DB
+                //iterate through DB
                 while(resultSet.next())
                 {
-                    records += resultSet.getString(1) + " " + resultSet.getString(2) + " " + resultSet.getInt(3) + " " + resultSet.getInt(4) + resultSet.getInt(5) + "\n";
+                    records += resultSet.getString(1) + " "
+                            + resultSet.getString(2) + " "
+                            + resultSet.getInt(3) + " "
+                            + resultSet.getInt(4) + " "
+                            + resultSet.getInt(5) + "\n";
                 }
 
-                resultSet = statement.executeQuery("SELECT user_name FROM user WHERE id =" + MainActivity.uID);
 
+                //Get user name.
+                resultSet = statement.executeQuery("SELECT user_name FROM user WHERE id =" + MainActivity.uID);
                 while(resultSet.next()) {
                     MainActivity.uName = resultSet.getString(1);
                 }
 
+                //get user distance data
                 resultSet = statement.executeQuery("SELECT distance_ran FROM user WHERE id =" + MainActivity.uID);
-
                 while(resultSet.next()) {
                     MainActivity.uDistance = resultSet.getString(1);
                 }
 
+                //get user score
                 resultSet = statement.executeQuery("SELECT user_score FROM user WHERE id =" + MainActivity.uID);
-
                 while(resultSet.next()) {
                     MainActivity.uScore = resultSet.getString(1);
                 }
 
+                //get user level
                 resultSet = statement.executeQuery("SELECT user_level FROM user WHERE id =" + MainActivity.uID);
-
                 while(resultSet.next()) {
                     MainActivity.uLevel = resultSet.getString(1);
                 }
@@ -89,40 +114,13 @@ public class ConnectDB extends AppCompatActivity {
         //-----------------------------------------------------
         @Override
         protected void onPostExecute(Void aVoid) {
-            thebox = (TextView) findViewById(R.id.statusText);
-            view1 = (TextView) findViewById(R.id.textView9);
-            view2 = (TextView) findViewById(R.id.textView10);
-            view3 = (TextView) findViewById(R.id.textView11);
-            view4 = (TextView) findViewById(R.id.textView12);
-            view5 = (TextView) findViewById(R.id.textView13);
-
-            //set userid
-            EditText idField = (EditText) findViewById(R.id.editText1);
-            MainActivity.uID = idField.getText().toString();
-
-            //set database hostname
-            EditText hostField = (EditText) findViewById(R.id.editText2);
-            hostName = hostField.getText().toString();
-
-            //set db admin name
-            EditText adminField = (EditText) findViewById(R.id.editText4);
-            adminName = adminField.getText().toString();
-
-            //set db password
-            EditText passField = (EditText) findViewById(R.id.editText3);
-            dbPass = passField.getText().toString();
-
-
+   
             thebox.setText(records);
             view1.setText(MainActivity.uID);
             view2.setText(MainActivity.uName);
             view3.setText(MainActivity.uDistance);
             view4.setText(MainActivity.uScore);
             view5.setText(MainActivity.uLevel);
-
-            /*just alternative ways to set a textfield i want to remember... lol
-            testView.setText(editView.getText().toString());
-            testView.setText(testString);*/
 
 
 
@@ -133,4 +131,51 @@ public class ConnectDB extends AppCompatActivity {
 
 
     }//end async
+
+    class updateDB extends AsyncTask<Void, Void, Void> {
+
+        String records = "",error = "", message = "Connected!!", distanceRan = "", unlockLevel = "";
+        //public Statement statement;
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            try {
+
+                Class.forName("com.mysql.jdbc.Driver");
+                Connection connection = DriverManager.getConnection(hostName, adminName, dbPass);
+                Statement statement = connection.createStatement();
+
+                statement.executeUpdate("UPDATE user SET distance_ran = "
+                        + MainActivity.uDistance +  " WHERE id = " + MainActivity.uID);
+
+                statement.executeUpdate("UPDATE user SET user_score = "
+                        + MainActivity.uScore +  " WHERE id = " + MainActivity.uID);
+
+                statement.executeUpdate("UPDATE user SET user_level = "
+                        + MainActivity.uLevel +  " WHERE id = " + MainActivity.uID);
+
+
+
+            } catch (Exception e) {
+                error = e.toString();
+
+            }
+            return null;
+        }
+
+
+        //-----------------------------------------------------
+        @Override
+        protected void onPostExecute(Void aVoid) {
+
+            if (error != "")
+                thebox.setText(error);
+            super.onPostExecute(aVoid);
+        }
+
+
+    }//end asyncUpdate
+
+
 }//end ConnectDB
